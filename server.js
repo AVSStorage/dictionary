@@ -1,0 +1,40 @@
+import express from 'express'
+import mongodb from 'mongodb'
+import bodyParser from 'body-parser'
+
+const app = express()
+const port = 5000
+const { MongoClient } = mongodb;
+
+const conn =  await MongoClient.connect('mongodb://root:example@mongo:27017/test?authSource=admin', {newUrlParser: true, useUnifiedTopology:true});
+const db = conn.db('test');
+app.set('view engine', 'pug');
+app.use(bodyParser.json());
+app.post('/add-word', async (req, res) => {
+    if (Object.keys(req.body).length > 0) {
+        const {name, value} = req.body;
+        await db.collection('dictionary').insertOne({name, value})
+        res.send('Данные были успешно добавлены')
+    } else {
+        res.send('Что-то пошло не так. Попробуйте снова')
+    }
+})
+
+
+app.get('/:word', async (req, res) => {
+
+ const word = req.params.word;
+
+ let result = await db.collection('dictionary').findOne({name: word});
+ if (result) {
+     const {name, value} = result;
+     res.render('index', {title: 'Словарь', name, value});
+ } else {
+     res.render('form', {title: 'Словарь'})
+ }
+
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
