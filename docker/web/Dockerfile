@@ -2,12 +2,10 @@ FROM node:14
 
 WORKDIR /app
 
-# Install app dependencies
-COPY package*.json /app
-RUN npm install
 
-COPY .  /app
+COPY .  .
+# Install app dependencies
 
 EXPOSE 5000
 
-CMD [ "node", "server.js", "--experimental-repl-await" ]
+CMD  npm install && node server.js --experimental-repl-await

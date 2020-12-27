@@ -1,6 +1,7 @@
 import express from 'express'
 import mongodb from 'mongodb'
 import bodyParser from 'body-parser'
+import fs from 'fs'
 
 const app = express()
 const port = 5000
@@ -8,8 +9,15 @@ const { MongoClient } = mongodb;
 
 const conn =  await MongoClient.connect('mongodb://root:example@mongo:27017/test?authSource=admin', {newUrlParser: true, useUnifiedTopology:true});
 const db = conn.db('test');
+
+fs.readFile('dictionary.json', async function (err, data) {
+    const dictionary = JSON.parse(data)
+    await db.collection('dictionary').insertMany(dictionary)
+})
+
 app.set('view engine', 'pug');
 app.use(bodyParser.json());
+
 app.post('/add-word', async (req, res) => {
     if (Object.keys(req.body).length > 0) {
         const {name, value} = req.body;
